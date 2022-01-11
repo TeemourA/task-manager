@@ -1,0 +1,1 @@
+export const loginErrorMessage = 'Unable to login';

@@ -3,6 +3,7 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
 import { appSalt } from '../constants/crypt.js';
+import { loginErrorMessage } from '../constants/errorMessages.js';
 
 const { Schema } = mongoose;
 const { isEmail } = validator;
@@ -15,6 +16,7 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
+    unique: true,
     required: true,
     trim: true,
     lowercase: true,
@@ -41,6 +43,19 @@ const UserSchema = new Schema({
   },
 });
 
+UserSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
+
+  if (!user) throw new Error(loginErrorMessage);
+
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatch) throw new Error(loginErrorMessage);
+
+  return user;
+};
+
+// Hash the plain text password before saving
 UserSchema.pre('save', async function (next) {
   const user = this;
 
