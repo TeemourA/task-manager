@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import { appSalt } from '../constants/crypt.js';
 import { loginErrorMessage } from '../constants/errorMessages.js';
@@ -41,7 +42,26 @@ const UserSchema = new Schema({
       if (age < 0) throw new Error('Age must be a positive number');
     },
   },
+  tokens: [{
+    token: {
+      type: String,
+      required: true,
+    } 
+  }]
 });
+
+UserSchema.methods.generateAuthToken = async function () {
+  // User instance
+  const user = this;
+  // @ts-ignore
+  const token = jwt.sign({ _id: user._id.toString() }, 'secret');
+
+  user.tokens = user.tokens.concat({ token });
+  // @ts-ignore
+  await user.save();
+
+  return token;
+};
 
 UserSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
