@@ -1,5 +1,4 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
 
 import { dbConnect } from './db/mongoose.js';
 import { userRouter } from './routes/user.js';
