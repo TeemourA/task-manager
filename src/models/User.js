@@ -3,6 +3,7 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import { secret } from '../constants/index.js';
 import { appSalt } from '../constants/crypt.js';
 import { loginErrorMessage } from '../constants/errorMessages.js';
 
@@ -54,7 +55,7 @@ UserSchema.methods.generateAuthToken = async function () {
   // User instance
   const user = this;
   // @ts-ignore
-  const token = jwt.sign({ _id: user._id.toString() }, 'secret');
+  const token = jwt.sign({ _id: user._id.toString() }, secret);
 
   user.tokens = user.tokens.concat({ token });
   // @ts-ignore

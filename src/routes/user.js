@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { auth } from '../middleware/auth.js';
 import { User, userAllowedUpdates } from '../models/User.js';
 
 export const userRouter = express.Router();
@@ -30,13 +31,9 @@ userRouter.post('/users/login', async (req, res) => {
   }
 });
 
-userRouter.get('/users', async (_, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(404).send();
-  }
+userRouter.get('/users/me', auth, async (req, res) => {
+  // @ts-ignore
+  res.status(200).send(req.user);
 });
 
 userRouter.get('/users/:id', async (req, res) => {
