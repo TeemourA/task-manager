@@ -31,6 +31,35 @@ userRouter.post('/users/login', async (req, res) => {
   }
 });
 
+userRouter.post('/users/logout', auth, async (req, res) => {
+  try {
+    // @ts-ignore
+    req.user.tokens = req.user.tokens.filter(
+      // @ts-ignore
+      ({ token }) => token !== req.token
+    );
+    // @ts-ignore
+    await req.user.save();
+
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
+userRouter.post('/users/logoutAll', auth, async (req, res) => {
+  try {
+    // @ts-ignore
+    req.user.tokens = [];
+    // @ts-ignore
+    await req.user.save();
+
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
 userRouter.get('/users/me', auth, async (req, res) => {
   // @ts-ignore
   res.status(200).send(req.user);
