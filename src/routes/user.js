@@ -65,18 +65,7 @@ userRouter.get('/users/me', auth, async (req, res) => {
   res.status(200).send(req.user);
 });
 
-userRouter.get('/users/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).send();
-
-    res.status(200).send(user);
-  } catch (err) {
-    res.status(404).send(err);
-  }
-});
-
-userRouter.patch('/users/:id', async (req, res) => {
+userRouter.patch('/users/me', auth, async (req, res) => {
   const requestedUpdates = Object.keys(req.body);
   const isUpdateAllowed = requestedUpdates.every((update) =>
     userAllowedUpdates.includes(update)
@@ -86,14 +75,13 @@ userRouter.patch('/users/:id', async (req, res) => {
     return res.status(400).send({ error: 'Invalid updates requested' });
 
   try {
-    const updatedUser = await User.findById(req.params.id);
+    // @ts-ignore
+    const updatedUser = req.user;
     requestedUpdates.forEach(
       (updateKey) => (updatedUser[updateKey] = req.body[updateKey])
     );
 
     await updatedUser.save();
-
-    if (!updatedUser) return res.status(404).send();
 
     res.status(201).send(updatedUser);
   } catch (err) {
@@ -101,12 +89,12 @@ userRouter.patch('/users/:id', async (req, res) => {
   }
 });
 
-userRouter.delete('/users/:id', async (req, res) => {
+userRouter.delete('/users/me', auth, async (req, res) => {
   try {
-    const user = await User.findByIdAndRemove(req.params.id);
-    if (!user) return res.status(404).send();
-
-    res.status(200).send(user);
+    // @ts-ignore
+    await req.user.remove();
+    // @ts-ignore
+    res.status(200).send(req.user);
   } catch (err) {
     res.status(404).send(err);
   }

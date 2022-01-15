@@ -43,13 +43,25 @@ const UserSchema = new Schema({
       if (age < 0) throw new Error('Age must be a positive number');
     },
   },
-  tokens: [{
-    token: {
-      type: String,
-      required: true,
-    } 
-  }]
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
+
+UserSchema.methods.toJSON = function () {
+  const user = this;
+  const userWithoutSensetiveData = user.toObject();
+
+  delete userWithoutSensetiveData.password;
+  delete userWithoutSensetiveData.tokens;
+
+  return userWithoutSensetiveData;
+};
 
 UserSchema.methods.generateAuthToken = async function () {
   // User instance
