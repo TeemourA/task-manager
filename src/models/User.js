@@ -3,6 +3,8 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import { Task } from './Task.js';
+
 import { secret } from '../constants/index.js';
 import { appSalt } from '../constants/crypt.js';
 import { loginErrorMessage } from '../constants/errorMessages.js';
@@ -53,6 +55,12 @@ const UserSchema = new Schema({
   ],
 });
 
+UserSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'owner',
+});
+
 UserSchema.methods.toJSON = function () {
   const user = this;
   const userWithoutSensetiveData = user.toObject();
@@ -95,6 +103,14 @@ UserSchema.pre('save', async function (next) {
   if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, appSalt);
   }
+
+  next();
+});
+
+// Delete user tasks whes user is removed
+UserSchema.pre('remove', async function (next) {
+  const user = this;
+  await Task.deleteMany({ owner: user._id });
 
   next();
 });
