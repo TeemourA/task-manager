@@ -1,7 +1,11 @@
 import express from 'express';
+import multer from 'multer';
 
 import { auth } from '../middleware/auth.js';
 import { User, userAllowedUpdates } from '../models/User.js';
+
+import { imageExtensionsRegex } from '../constants/regex.js';
+import { avatarImageSizeLimit } from '../constants/fileSizeLimit.js';
 
 export const userRouter = express.Router();
 
@@ -99,3 +103,24 @@ userRouter.delete('/users/me', auth, async (req, res) => {
     res.status(404).send(err);
   }
 });
+
+const uploadAvatar = multer({
+  dest: 'avatars',
+  limits: {
+    fileSize: avatarImageSizeLimit,
+  },
+  fileFilter(req, file, callback) {
+    if (!file.originalname.match(imageExtensionsRegex))
+      return callback(new Error('Please upload an image'));
+
+    callback(null, true);
+  },
+});
+
+userRouter.post(
+  '/users/me/avatar',
+  uploadAvatar.single('avatar'),
+  (req, res) => {
+    res.status(200).send();
+  }
+);

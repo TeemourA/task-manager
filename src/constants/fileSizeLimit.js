@@ -1,0 +1,1 @@
+export const avatarImageSizeLimit = 1000000;
