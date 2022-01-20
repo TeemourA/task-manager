@@ -23,10 +23,19 @@ taskRouter.post('/tasks', auth, async (req, res) => {
 
 // GET /tasks?completed=true
 // GET /tasks?limit=10&skip=0
+// GET /tasks?sortBy=createdAt:asc/desc
 taskRouter.get('/tasks', auth, async (req, res) => {
   try {
     const match = {};
+    const sort = {};
+
     if (req.query.completed) match.completed = req.query.completed === 'true';
+    if (req.query.sortBy) {
+      // @ts-ignore
+      const [sortKey, value] = req.query.sortBy.split(':');
+
+      sort[sortKey] = value === 'desc' ? -1 : 1;
+    }
     // @ts-ignore
     const { tasks } = await req.user.populate({
       path: 'tasks',
@@ -34,6 +43,7 @@ taskRouter.get('/tasks', auth, async (req, res) => {
       options: {
         limit: Number(req.query.limit),
         skip: Number(req.query.skip),
+        sort,
       },
     });
     res.status(200).send(tasks);
