@@ -1,4 +1,5 @@
 import express from 'express';
+import 'dotenv/config';
 
 import { dbConnect } from './db/mongoose.js';
 import { userRouter } from './routes/user.js';

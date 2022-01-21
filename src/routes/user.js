@@ -1,9 +1,9 @@
 import express from 'express';
 import multer from 'multer';
-import sharp from 'sharp';
 
 import { auth } from '../middleware/auth.js';
 import { User, userAllowedUpdates } from '../models/User.js';
+import { sendCancelationEmail, sendWelcomeEmail } from '../emails/account.js';
 
 import { handleError } from '../utils/router.js';
 import { normalizeUserAvatar } from '../utils/normalizeUserAvatar.js';
@@ -18,6 +18,7 @@ userRouter.post('/users', async (req, res) => {
 
   try {
     await user.save();
+    sendWelcomeEmail(user.email, user.name);
     const token = await user.generateAuthToken();
     res.status(201).send({ user, token });
   } catch (err) {
@@ -101,6 +102,8 @@ userRouter.delete('/users/me', auth, async (req, res) => {
   try {
     // @ts-ignore
     await req.user.remove();
+    // @ts-ignore
+    sendCancelationEmail(req.user.email, req.user.name);
     // @ts-ignore
     res.status(200).send(req.user);
   } catch (err) {
