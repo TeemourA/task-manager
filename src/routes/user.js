@@ -5,8 +5,7 @@ import { auth } from '../middleware/auth.js';
 import { User, userAllowedUpdates } from '../models/User.js';
 import { sendCancelationEmail, sendWelcomeEmail } from '../emails/account.js';
 
-import { handleError } from '../utils/router.js';
-import { normalizeUserAvatar } from '../utils/normalizeUserAvatar.js';
+import { handleError, normalizeUserAvatar } from '../utils/router.js';
 
 import { imageExtensionsRegex } from '../constants/regex.js';
 import { avatarImageSizeLimit } from '../constants/fileSizeLimit.js';
