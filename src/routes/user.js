@@ -1,8 +1,12 @@
 import express from 'express';
 import multer from 'multer';
+import sharp from 'sharp';
 
 import { auth } from '../middleware/auth.js';
 import { User, userAllowedUpdates } from '../models/User.js';
+
+import { handleError } from '../utils/router.js';
+import { normalizeUserAvatar } from '../utils/normalizeUserAvatar.js';
 
 import { imageExtensionsRegex } from '../constants/regex.js';
 import { avatarImageSizeLimit } from '../constants/fileSizeLimit.js';
@@ -105,7 +109,6 @@ userRouter.delete('/users/me', auth, async (req, res) => {
 });
 
 const uploadAvatar = multer({
-  dest: 'avatars',
   limits: {
     fileSize: avatarImageSizeLimit,
   },
@@ -119,8 +122,43 @@ const uploadAvatar = multer({
 
 userRouter.post(
   '/users/me/avatar',
+  auth,
   uploadAvatar.single('avatar'),
-  (req, res) => {
+  async (req, res) => {
+    const buffer = await normalizeUserAvatar(req.file.buffer);
+    // @ts-ignore
+    req.user.avatar = buffer;
+    // @ts-ignore
+    await req.user.save();
     res.status(200).send();
-  }
+  },
+  handleError
 );
+
+userRouter.delete('/users/me/avatar', auth, async (req, res) => {
+  try {
+    // @ts-ignore
+    req.user.avatar = null;
+    // @ts-ignore
+    await req.user.save();
+
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
+userRouter.get('/users/:id/avatar', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user || !user.avatar) {
+      throw new Error('User or avatar are not found');
+    }
+
+    res.set('Content-Type', 'image/png');
+    res.status(200).send(user.avatar);
+  } catch (err) {
+    res.status(404).send();
+  }
+});

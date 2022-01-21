@@ -54,6 +54,9 @@ const UserSchema = new Schema(
         },
       },
     ],
+    avatar: {
+      type: Buffer,
+    },
   },
   {
     timestamps: { currentTime: () => new Date() },
@@ -72,6 +75,7 @@ UserSchema.methods.toJSON = function () {
 
   delete userWithoutSensetiveData.password;
   delete userWithoutSensetiveData.tokens;
+  delete userWithoutSensetiveData.avatar;
 
   return userWithoutSensetiveData;
 };
