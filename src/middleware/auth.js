@@ -3,12 +3,11 @@ import { unauthorizedAccessErrorMessage } from '../constants/errorMessages.js';
 
 import { User } from '../models/User.js';
 import { authorization } from '../constants/headers.js';
-import { secret } from '../constants/index.js';
 
 export const auth = async (req, res, next) => {
   try {
     const token = req.header(authorization).replace('Bearer ', '');
-    const { _id } = jwt.verify(token, secret);
+    const { _id } = jwt.verify(token, process.env.TOKEN_SECRET);
     const user = await User.findOne({ _id, 'tokens.token': token });
 
     if (!user) throw new Error();

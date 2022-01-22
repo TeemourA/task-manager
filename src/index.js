@@ -1,5 +1,4 @@
 import express from 'express';
-import 'dotenv/config';
 
 import { dbConnect } from './db/mongoose.js';
 import { userRouter } from './routes/user.js';
@@ -9,7 +8,7 @@ import { allowCors } from './middleware/allowCors.js';
 dbConnect();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 app.use(allowCors);
 app.use(express.json());
