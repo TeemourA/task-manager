@@ -1,8 +1,8 @@
 import express from 'express';
 
-import { auth } from '../middleware/auth.js';
+import { auth } from '../../middleware/auth.js';
 
-import { Task, taskAllowedUpdates } from '../models/Task.js';
+import { Task, taskAllowedUpdates } from '../../models/Task.js';
 
 export const taskRouter = express.Router();
 

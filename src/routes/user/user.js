@@ -1,14 +1,14 @@
 import express from 'express';
 import multer from 'multer';
 
-import { auth } from '../middleware/auth.js';
-import { User, userAllowedUpdates } from '../models/User.js';
-import { sendCancelationEmail, sendWelcomeEmail } from '../emails/account.js';
+import { auth } from '../../middleware/auth.js';
+import { User, userAllowedUpdates } from '../../models/User.js';
+import { sendCancelationEmail, sendWelcomeEmail } from '../../emails/account.js';
 
-import { handleError, normalizeUserAvatar } from '../utils/router.js';
+import { handleError, normalizeUserAvatar } from '../../utils/router.js';
 
-import { imageExtensionsRegex } from '../constants/regex.js';
-import { avatarImageSizeLimit } from '../constants/fileSizeLimit.js';
+import { imageExtensionsRegex } from '../../constants/regex.js';
+import { avatarImageSizeLimit } from '../../constants/fileSizeLimit.js';
 
 export const userRouter = express.Router();
 
