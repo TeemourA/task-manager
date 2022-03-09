@@ -1,7 +1,11 @@
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 import app from '../../app.js';
 import { User } from '../../models/User.js';
+
+import { authorization } from '../../constants/headers.js';
 
 const user1 = {
   name: 'Tom',
@@ -9,10 +13,18 @@ const user1 = {
   password: 'mynicepass',
 };
 
+const user2Id = new mongoose.Types.ObjectId();
+
 const user2 = {
+  _id: user2Id,
   name: 'Tim',
   email: 'tim@tim.com',
   password: 'mynicepass',
+  tokens: [
+    {
+      token: jwt.sign({ _id: user2Id }, process.env.TOKEN_SECRET),
+    },
+  ],
 };
 
 const user3 = {
@@ -40,7 +52,7 @@ test('Should login existing user', async () => {
     .expect(200);
 });
 
-test("Shouldn't login nonexisting user", async () => {
+test('Should not login nonexisting user', async () => {
   await request(app)
     .post('/users/login')
     .send({
@@ -48,4 +60,28 @@ test("Shouldn't login nonexisting user", async () => {
       password: user3.password,
     })
     .expect(400);
+});
+
+test('Should get profile for user', async () => {
+  await request(app)
+    .get('/users/me')
+    .set(authorization, `Bearer ${user2.tokens[0].token}`)
+    .send()
+    .expect(200);
+});
+
+test('Should not get profile for unauthenticated user', async () => {
+  await request(app).get('/users/me').send().expect(401);
+});
+
+test('Should delete profile for authenticated user', async () => {
+  await request(app)
+    .delete('/users/me')
+    .set(authorization, `Bearer ${user2.tokens[0].token}`)
+    .send()
+    .expect(200);
+});
+
+test('Should not delete profile for unauthenticated user', async () => {
+  await request(app).get('/users/me').send().expect(401);
 });
