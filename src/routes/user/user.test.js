@@ -109,3 +109,36 @@ test('Should delete profile for authenticated user', async () => {
 test('Should not delete profile for unauthenticated user', async () => {
   await request(app).get('/users/me').send().expect(401);
 });
+
+test('Should upload avatar image', async () => {
+  await request(app)
+    .post('/users/me/avatar')
+    .set(authorization, `Bearer ${user2.tokens[0].token}`)
+    .attach(
+      'avatar',
+      'C:/Users/Timur_Akhmedov/Desktop/dev/mydev/node/task-manager-api/src/tests/fixtures/profile-pic.jpg'
+    )
+    .expect(200);
+
+  const user = await User.findById(user2Id);
+  expect(user.avatar).toEqual(expect.any(Buffer));
+});
+
+test('Should update valid user fields', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set(authorization, `Bearer ${user2.tokens[0].token}`)
+    .send({ name: 'John' })
+    .expect(201);
+
+  const user = await User.findById(user2Id);
+  expect(user.name).toBe('John');
+});
+
+test('Should not update invalid user fields', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set(authorization, `Bearer ${user2.tokens[0].token}`)
+    .send({ addres: 'Moscow' })
+    .expect(400);
+});

@@ -3,7 +3,10 @@ import multer from 'multer';
 
 import { auth } from '../../middleware/auth.js';
 import { User, userAllowedUpdates } from '../../models/User.js';
-import { sendCancelationEmail, sendWelcomeEmail } from '../../emails/account.js';
+import {
+  sendCancelationEmail,
+  sendWelcomeEmail,
+} from '../../emails/account.js';
 
 import { handleError, normalizeUserAvatar } from '../../utils/router.js';
 
