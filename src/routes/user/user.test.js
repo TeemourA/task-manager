@@ -1,42 +1,20 @@
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 
 import app from '../../app.js';
 import { User } from '../../models/User.js';
 
+import {
+  user1,
+  user2,
+  user2Id,
+  user3,
+  setupTestDatabase,
+} from '../../tests/fixtures/db';
 import { authorization } from '../../constants/headers.js';
 
-const user1 = {
-  name: 'Tom',
-  email: 'tom@tom.com',
-  password: 'mynicepass',
-};
+const { PROFILE_PIC_PATH } = process.env;
 
-const user2Id = new mongoose.Types.ObjectId();
-
-const user2 = {
-  _id: user2Id,
-  name: 'Tim',
-  email: 'tim@tim.com',
-  password: 'mynicepass',
-  tokens: [
-    {
-      token: jwt.sign({ _id: user2Id }, process.env.TOKEN_SECRET),
-    },
-  ],
-};
-
-const user3 = {
-  name: 'xyz',
-  email: 'xyz@xyz.com',
-  password: 'mynicepass',
-};
-
-beforeEach(async () => {
-  await User.deleteMany();
-  await new User(user2).save();
-});
+beforeEach(setupTestDatabase);
 
 test('Should signup a new user', async () => {
   const res = await request(app).post('/users').send(user1).expect(201);
@@ -114,10 +92,7 @@ test('Should upload avatar image', async () => {
   await request(app)
     .post('/users/me/avatar')
     .set(authorization, `Bearer ${user2.tokens[0].token}`)
-    .attach(
-      'avatar',
-      'C:/Users/Timur_Akhmedov/Desktop/dev/mydev/node/task-manager-api/src/tests/fixtures/profile-pic.jpg'
-    )
+    .attach('avatar', PROFILE_PIC_PATH)
     .expect(200);
 
   const user = await User.findById(user2Id);
